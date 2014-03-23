@@ -1,0 +1,16 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/settings"
+        android:icon="@drawable/ic_action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/settings"/>
+    <item
+        android:id="@+id/server_code"
+        android:icon="@drawable/ic_action_cloud"
+        android:orderInCategory="110"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/get_server_code"/>
+
+</menu>

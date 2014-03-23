@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ArduinoPixel</string>
+    <string name="power">Turn On</string>
+    <string name="settings">Settings</string>
+    <string name="dot">.</string>
+    <string name="colon">:</string>
+    <string name="cancel">Cancel</string>
+    <string name="button_label">OK</string>
+    <string name="ok">OK</string>
+    <string name="get_server_code">Get Server Code</string>
+
+</resources>
