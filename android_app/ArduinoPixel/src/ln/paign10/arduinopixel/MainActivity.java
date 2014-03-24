@@ -138,17 +138,25 @@ public class MainActivity extends Activity implements DialogListener,
 		});
 
 		mToast = Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT);
-		
+
 		executor = Executors.newScheduledThreadPool(1);
 	}
 
 	@Override
 	protected void onResume() {
 		online = false;
-		if (isNetworkAvailable())
-			new HttpTask(Method.GET, URI_STATUS).execute();
+		// if (isNetworkAvailable())
+		new HttpTask(Method.GET, URI_STATUS).execute();
 
 		super.onResume();
+	}
+
+	@Override
+	protected void onPause() {
+		if (mCheckHost != null)
+			cancelExecutor();
+
+		super.onPause();
 	}
 
 	private class HttpTask extends AsyncTask<Integer, Void, String> {
@@ -280,7 +288,7 @@ public class MainActivity extends Activity implements DialogListener,
 			String[] optNames = { "r", "g", "b" };
 			for (int i = 0; i < 3; ++i)
 				mColor[i] = responseObject.optInt(optNames[i]);
-			
+
 			mColorPicker.setColor(Color.rgb(mColor[0], mColor[1], mColor[2]));
 			mColorPicker.postInvalidate();
 
@@ -297,21 +305,22 @@ public class MainActivity extends Activity implements DialogListener,
 
 	// Updates the power state of the LED strip
 	private void updatePowerState(boolean state) {
+		mState = state;
+		
 		if (!isNetworkAvailable()) {
 			mToast.setText("Network Unavailable");
 			mToast.show();
 			online = false;
+			if (mCheckHost == null)
+				startExecutor();
 			return;
 		}
 
 		if (online) {
-			if (state) {
-				mState = true;
+			if (state)
 				new HttpTask(Method.PUT, URI_STATUS_ON).execute();
-			} else {
-				mState = false;
+			else
 				new HttpTask(Method.PUT, URI_STATUS_OFF).execute();
-			}
 		}
 	}
 
