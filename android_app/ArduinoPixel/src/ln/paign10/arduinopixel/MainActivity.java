@@ -9,6 +9,8 @@
  *     A server that accepts the following HTTP requests:
  *     > GET / HTTP/1.1                  : Responds w/ "Hello from Arduino Server"
  *     > GET /strip/status/ HTTP/1.1     : Responds w/ "ON"/"OFF" for the power state of the strip
+ *     > GET /strip/color/ HTTP/1.1      : Responds w/ a JSON representation of 
+ *                                         the strip color -> {"r":x,"g":x,"b":x}
  *     > PUT /strip/status/on/ HTTP/1.1  : Turns the LED strip on
  *     > PUT /strip/status/off/ HTTP/1.1 : Turns the LED strip off
  *     > PUT /strip/color/ HTTP/1.1      : Changes the color of the LED strip
@@ -39,18 +41,23 @@
 
 package ln.paign10.arduinopixel;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import ln.paign10.arduinopixel.IpDialog.DialogListener;
 
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -65,6 +72,7 @@ import android.net.Uri;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CompoundButton;
@@ -73,6 +81,7 @@ import android.widget.NumberPicker;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.chiralcode.colorpicker.ColorPicker;
 import com.chiralcode.colorpicker.ColorPicker.ColorListener;
 
 public class MainActivity extends Activity implements DialogListener,
@@ -90,10 +99,14 @@ public class MainActivity extends Activity implements DialogListener,
 	private String URI_STATUS_OFF = "/strip/status/off/";
 	private String URI_COLOR = "/strip/color/";
 
-	private DialogFragment mDialog;
 	private static SharedPreferences mPrefs;
-	public Toast mToast;
+	private DialogFragment mDialog;
+	private ScheduledExecutorService executor;
+	private ScheduledFuture<?> mCheckHost;
+	private static boolean online = false;
+	private ColorPicker mColorPicker;
 	private Switch mSwitch;
+	public Toast mToast;
 	private static int[] mUri = { 192, 168, 1, 100, 80 };
 	@SuppressWarnings("unused")
 	private boolean mState = false;
@@ -112,7 +125,7 @@ public class MainActivity extends Activity implements DialogListener,
 		mUri[3] = mPrefs.getInt("Int1", 100);
 		mUri[4] = mPrefs.getInt("Port", 80);
 
-		mToast = Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT);
+		mColorPicker = (ColorPicker) findViewById(R.id.colorPicker);
 
 		mSwitch = (Switch) findViewById(R.id.power_switch);
 		mSwitch.setOnCheckedChangeListener(new OnCheckedChangeListener() {
@@ -120,35 +133,37 @@ public class MainActivity extends Activity implements DialogListener,
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
 					boolean isChecked) {
-				updateState(isChecked);
+				updatePowerState(isChecked);
 			}
 		});
+
+		mToast = Toast.makeText(MainActivity.this, "", Toast.LENGTH_SHORT);
+		
+		executor = Executors.newScheduledThreadPool(1);
 	}
 
 	@Override
 	protected void onResume() {
-
-		if (!isNetworkAvailable()) {
-			mToast.setText("Network Unavailable");
-			mToast.show();
-		} else {
+		online = false;
+		if (isNetworkAvailable())
 			new HttpTask(Method.GET, URI_STATUS).execute();
-		}
 
 		super.onResume();
 	}
 
 	private class HttpTask extends AsyncTask<Integer, Void, String> {
 		private AndroidHttpClient mClient = AndroidHttpClient.newInstance("");
-		private Method rMethod; // HTTP request method
+		private Method reqMethod; // HTTP request method
 		private String URL;
-		private String rUri; // Requested URI
+		private String reqUri; // Requested URI
 
 		public HttpTask(Method method, String uri) {
-			rMethod = method;
-			rUri = uri;
+			reqMethod = method;
+			reqUri = uri;
 			URL = "http://" + mUri[0] + "." + mUri[1] + "." + mUri[2] + "."
-					+ mUri[3] + ":" + mUri[4] + rUri;
+					+ mUri[3] + ":" + mUri[4] + reqUri;
+
+			Log.i("request", method.toString() + ", " + URL);
 		}
 
 		@Override
@@ -157,7 +172,7 @@ public class MainActivity extends Activity implements DialogListener,
 
 			try {
 
-				if (rMethod == Method.GET) {
+				if (reqMethod == Method.GET) {
 
 					HttpGet request = new HttpGet(URL);
 					return mClient.execute(request, responseHandler);
@@ -166,7 +181,7 @@ public class MainActivity extends Activity implements DialogListener,
 
 					HttpPut request = new HttpPut(URL);
 					try {
-						if (rUri.equals(URI_COLOR))
+						if (reqUri.equals(URI_COLOR))
 							// JSON data: {"r":x,"g":x,"b":x}
 							request.setEntity(new StringEntity("{\"r\":" + c[0]
 									+ ",\"g\":" + c[1] + ",\"b\":" + c[2] + "}"));
@@ -178,10 +193,11 @@ public class MainActivity extends Activity implements DialogListener,
 
 				}
 
-			} catch (ClientProtocolException exception) {
-				exception.printStackTrace();
-			} catch (IOException exception) {
-				exception.printStackTrace();
+			} catch (Exception e) {
+				// e.printStackTrace();
+				online = false;
+				if (mCheckHost == null)
+					startExecutor();
 			}
 			return null;
 		}
@@ -192,21 +208,39 @@ public class MainActivity extends Activity implements DialogListener,
 			if (null != mClient)
 				mClient.close();
 
-			onRequestResult(rMethod, rUri, result);
+			online = true;
+			if (reqMethod == Method.GET)
+				onGetRequestResult(reqUri, result);
 		}
 	}
 
-	// Responds to the result provided, given the HTTP request parameters
-	void onRequestResult(Method method, String uri, String result) {
+	// Responds to the result provided, given the HTTP GET request parameters
+	private void onGetRequestResult(String uri, String result) {
 		if (result == null) {
-			if (method == Method.GET) {
+			if (uri.equals(URI_ROOT)) {
 				mToast.setText("Host Unreachable");
 				mToast.show();
 			}
+
+			online = false;
+
+			if (mCheckHost == null)
+				startExecutor();
+
 			return;
 		}
 
-		if (uri.equals(URI_STATUS)) {
+		if (mCheckHost != null)
+			cancelExecutor();
+
+		if (uri.equals(URI_ROOT)) {
+			new HttpTask(Method.GET, URI_STATUS).execute();
+			mToast.setText(result);
+			mToast.show();
+
+		} else if (uri.equals(URI_STATUS)) {
+			new HttpTask(Method.GET, URI_COLOR).execute();
+
 			if (result.equals("OFF")) {
 				mState = false;
 				mSwitch.setChecked(false);
@@ -214,64 +248,71 @@ public class MainActivity extends Activity implements DialogListener,
 				mState = true;
 				mSwitch.setChecked(true);
 			}
-		} else if (uri.equals(URI_ROOT)) {
-			mToast.setText(result);
-			mToast.show();
+
+		} else {
+			parseJsonData(result);
 		}
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
+	private void startExecutor() {
+		mCheckHost = executor.scheduleWithFixedDelay(new Runnable() {
+			@Override
+			public void run() {
+				new HttpTask(Method.GET, URI_STATUS).execute();
+			}
+		}, 10, 10, TimeUnit.SECONDS);
+
+		Log.i("request", "Executor started");
 	}
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.settings:
-			mDialog = new IpDialog();
-			mDialog.show(getFragmentManager(), "Settings");
-			break;
-		case R.id.server_code:
-			openURL();
-			break;
-		default:
-			break;
+	private void cancelExecutor() {
+		mCheckHost.cancel(true);
+		mCheckHost = null;
+
+		Log.i("request", "Executor canceled");
+	}
+
+	private void parseJsonData(String result) {
+		try {
+			JSONObject responseObject = (JSONObject) new JSONTokener(result)
+					.nextValue();
+
+			String[] optNames = { "r", "g", "b" };
+			for (int i = 0; i < 3; ++i)
+				mColor[i] = responseObject.optInt(optNames[i]);
+			
+			mColorPicker.setColor(Color.rgb(mColor[0], mColor[1], mColor[2]));
+			mColorPicker.postInvalidate();
+
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-		return true;
+
 	}
 
-	private boolean isNetworkAvailable() {
-		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo activeNetworkInfo = connectivityManager
-				.getActiveNetworkInfo();
-		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+	// Returns true if host is reachable
+	public static synchronized boolean isOnline() {
+		return online;
 	}
 
 	// Updates the power state of the LED strip
-	private void updateState(boolean state) {
+	private void updatePowerState(boolean state) {
 		if (!isNetworkAvailable()) {
 			mToast.setText("Network Unavailable");
 			mToast.show();
+			online = false;
 			return;
 		}
 
-		if (state) {
-			mState = true;
-			new HttpTask(Method.PUT, URI_STATUS_ON).execute();
-		} else {
-			mState = false;
-			new HttpTask(Method.PUT, URI_STATUS_OFF).execute();
+		if (online) {
+			if (state) {
+				mState = true;
+				new HttpTask(Method.PUT, URI_STATUS_ON).execute();
+			} else {
+				mState = false;
+				new HttpTask(Method.PUT, URI_STATUS_OFF).execute();
+			}
 		}
-	}
-
-	// Opens the web page (codebender project) with the server code
-	public void openURL() {
-		String url = "https://codebender.cc/sketch:31742";
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		intent.setData(Uri.parse(url));
-		startActivity(intent);
 	}
 
 	@Override
@@ -303,10 +344,9 @@ public class MainActivity extends Activity implements DialogListener,
 		editor.putInt("Port", mUri[4]);
 		editor.commit();
 
-		if (isNetworkAvailable()) {
+		online = false;
+		if (isNetworkAvailable())
 			new HttpTask(Method.GET, URI_ROOT).execute();
-			new HttpTask(Method.GET, URI_STATUS).execute();
-		}
 	}
 
 	@Override
@@ -317,8 +357,45 @@ public class MainActivity extends Activity implements DialogListener,
 		mColor[1] = Color.green(color);
 		mColor[2] = Color.blue(color);
 
-		new HttpTask(Method.PUT, URI_COLOR).execute(mColor[0], mColor[1],
-				mColor[2]);
+		if (online)
+			new HttpTask(Method.PUT, URI_COLOR).execute(mColor[0], mColor[1],
+					mColor[2]);
+	}
 
+	// Opens the web page (codebender project) with the server code
+	public void openURL() {
+		String url = "https://codebender.cc/sketch:31742";
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		intent.setData(Uri.parse(url));
+		startActivity(intent);
+	}
+
+	private boolean isNetworkAvailable() {
+		ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetworkInfo = connectivityManager
+				.getActiveNetworkInfo();
+		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.main, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.settings:
+			mDialog = new IpDialog();
+			mDialog.show(getFragmentManager(), "Settings");
+			break;
+		case R.id.server_code:
+			openURL();
+			break;
+		default:
+			break;
+		}
+		return true;
 	}
 }

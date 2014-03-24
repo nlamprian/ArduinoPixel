@@ -16,6 +16,7 @@
 
 package com.chiralcode.colorpicker;
 
+import ln.paign10.arduinopixel.MainActivity;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -85,7 +86,9 @@ public class ColorPicker extends View {
 
     /** Currently selected color */
     private float[] colorHSV = new float[] { 0f, 0f, 1f };
+    
 	private ColorListener mListener;
+	private int REQUEST_FREQ = 80;  // f = 1 / (80ms) kHz = 12.5 Hz 
 	private long timeRef;
 
     public ColorPicker(Context context, AttributeSet attrs, int defStyle) {
@@ -310,14 +313,14 @@ public class ColorPicker extends View {
             int cx = x - getWidth() / 2;
             int cy = y - getHeight() / 2;
             double d = Math.sqrt(cx * cx + cy * cy);
-            boolean changed = false;
+            boolean colorChanged = false;
 
             if (d <= colorWheelRadius) {
 
                 colorHSV[0] = (float) (Math.toDegrees(Math.atan2(cy, cx)) + 180f);
                 colorHSV[1] = Math.max(0f, Math.min(1f, (float) (d / colorWheelRadius)));
 
-                changed = true;
+                colorChanged = true;
                 
                 invalidate();
 
@@ -325,15 +328,15 @@ public class ColorPicker extends View {
 
                 colorHSV[2] = (float) Math.max(0, Math.min(1, Math.atan2(cy, cx) / Math.PI + 0.5f));
 
-                changed = true;
+                colorChanged = true;
                 
                 invalidate();
             }
             
-            if (changed && System.currentTimeMillis() - timeRef > 100) {
+            if (colorChanged && MainActivity.isOnline() && System.currentTimeMillis() - timeRef > REQUEST_FREQ) {
             	mListener.onColorChanged(getColor());
             	timeRef = System.currentTimeMillis();
-            	changed = false;
+            	colorChanged = false;
             }
 
             return true;

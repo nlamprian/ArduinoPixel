@@ -4,7 +4,7 @@
  *   NeoPixel LED strip. The client side is an Android app that allows for 
  *   the turning on and off of the strip and the change of its color.
  *   
- * 	 For the server side, the equipment needed is an Arduino Ethernet or any
+ *   For the server side, the equipment needed is an Arduino Ethernet or any
  *   Arduino compatible board with an Ethernet shield. For the client side, an
  *   Android phone or tablet is needed.
  * 
@@ -13,12 +13,12 @@
  *     Specify the following:  ( look for the arrows, <====< )
  *     > MAC address of the controller (it's on the back side)
  *     > IP address (one of your choice that's not already occupied in your subnet)
- *         and Port number of the server (You may leave them as is)
+ *       and Port number of the server (You may leave them as is)
  *     > The NeoPixel LED strip data pin and the number of the LEDs on the strip
  *   Client side:
  *     > Install the Android app, ArduinoPixel, from Google Play.
  *     > Open the app, go to Settings, and update the host IP address and Port number
- *         (Not necessary if you didn't change them on the server side)
+ *       (Not necessary, if you didn't change them on the server side)
  *     > Enjoy!
  * 
  * Specifications:
@@ -26,6 +26,8 @@
  *     A server that accepts the following HTTP requests:
  *     > GET / HTTP/1.1                  : Responds w/ "Hello from Arduino Server"
  *     > GET /strip/status/ HTTP/1.1     : Responds w/ "ON"/"OFF" for the power state of the strip
+ *     > GET /strip/color/ HTTP/1.1      : Responds w/ a JSON representation of 
+ *                                         the strip color -> {"r":x,"g":x,"b":x}
  *     > PUT /strip/status/on/ HTTP/1.1  : Turns the LED strip on
  *     > PUT /strip/status/off/ HTTP/1.1 : Turns the LED strip off
  *     > PUT /strip/color/ HTTP/1.1      : Changes the color of the LED strip
@@ -43,7 +45,7 @@
  * 
  * ArduinoPixel:
  *   You can find the app's source on github:
- *     https://github.com/pAIgn10/ArduinoPixel
+ *   https://github.com/pAIgn10/ArduinoPixel
  * 
  * Author:
  *   Nick Lamprianidis { paign10.ln [at] gmail [dot] com }
@@ -90,9 +92,10 @@ enum Uri
 {
     ROOT,        // "/"
     STATUS,      // "/strip/status/"
+    COLOR_GET,   // "/strip/color/"
     STATUS_ON,   // "/strip/status/on/"
     STATUS_OFF,  // "/strip/status/off/"
-    COLOR        // "/strip/color/"
+    COLOR_PUT    // "/strip/color/"
 };
 
 // Specifies whether the LED strip is on or off
@@ -151,6 +154,7 @@ void loop()
             }
         }
         
+        // Parses the request line
         int8_t method, uri;
         parseRequestLine(method, uri, String(request));
 
@@ -167,6 +171,15 @@ void loop()
                     case STATUS:
                         respond(200, "OK", false, power?"ON":"OFF");
                         break;
+                        
+                    case COLOR_GET:
+                    	{
+                    	String colorData = "{\"r\":" + String(color[0]) + 
+                    	                   ",\"g\":" + String(color[1]) + 
+                    	                   ",\"b\":" + String(color[2]) + "}";
+                    	respond(200, "OK", false, colorData);
+                    	}
+                    	break;
 
                     default:
                         respond(404, "Not Found", false, '\0');
@@ -191,7 +204,7 @@ void loop()
                         break;
 
                     // Parses the JSON data (and updates the LED strip color)
-                    case COLOR:
+                    case COLOR_PUT:
                         getJson(buf);  // Retrieves the JSON data
                         parseColors(String(buf));  // Parses the data
                         if (power)
@@ -240,7 +253,10 @@ void parseRequestLine(int8_t& method, int8_t& uri, String request)
     else if (reqUri.equals("/strip/status/off/"))
         uri = STATUS_OFF;
     else if (reqUri.equals("/strip/color/"))
-        uri = COLOR;
+    	if (method == GET)
+    		uri = COLOR_GET;
+    	else
+        	uri = COLOR_PUT;
     else
         uri = -1;
         
@@ -258,7 +274,7 @@ void parseRequestLine(int8_t& method, int8_t& uri, String request)
 //             statusMsg  - Status message for the response line
 //             keepAlive  - Whether to keep the connection open or not
 //             data       - Data to return to client
-void respond(int statusCode, const char* statusMsg, boolean keepAlive, const char* data)
+void respond(int statusCode, const char* statusMsg, boolean keepAlive, String data)
 {
         #if defined(DEBUG)
         Serial.print("HTTP/1.1 ");
