@@ -9,7 +9,7 @@ This project consists of two pieces. The first piece is an **Arduino sketch** th
 
 The **Arduino sketch** is also available at [codebender](https://codebender.cc/sketch:31742). You can **clone** the project, **update** the controller and network parameters, and **upload** it straight to your **Arduino Ethernet**, or any other Arduino compatible board w/ an Ethernet Shield.
 
-The **Android application** is available on [Google Play](https://play.google.com/store/apps/details?id=ln.paign10.arduinopixel). **Install** the app to your phone or tablet, **configure** the network parameters you set earlier in the Arduino sketch, and you are **ready** to go. You can watch a demo on [YouTube](http://www.youtube.com/watch?v=AuqOQ0Pe_c0).
+The **Android application** is available on [Google Play](https://play.google.com/store/apps/details?id=ln.paign10.arduinopixel). **Install** the app on your phone or tablet, **configure** the network parameters you set earlier in the Arduino sketch, and you are **ready** to go. You can watch a demo on [YouTube](http://www.youtube.com/watch?v=AuqOQ0Pe_c0).
 
 API
 ---
