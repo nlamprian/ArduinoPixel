@@ -18,8 +18,8 @@ The server accepts the following HTTP requests:
 * A `GET` request to `/`. It responds with a **Hello from Arduino Server** message.
 * A `GET` request to `/strip/status/`. It responds with **ON** or **OFF** for the on/off state of the strip.
 * A `GET` request to `/strip/color/`. It responds with a **JSON representation** of the strip's **color**, e.g. `{"r":92,"g":34,"b":127}`.
-* A `PUT` request to `/strip/status/on`. It **turns** the strip **on**.
-* A `PUT` request to `/strip/status/off`. It **turns** the strip **off**.
+* A `PUT` request to `/strip/status/on/`. It **turns** the strip **on**.
+* A `PUT` request to `/strip/status/off/`. It **turns** the strip **off**.
 * A `PUT` request to `/strip/color/`. It **changes** the strip's **color**. The **data** are delivered as a **JSON object**, e.g. `{"r":48,"g":254,"b":176}`.
 
 
