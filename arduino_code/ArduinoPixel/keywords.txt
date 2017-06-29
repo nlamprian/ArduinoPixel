@@ -1,0 +1,59 @@
+###########################################
+# Syntax Coloring Map For ArduinoPixel
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+arduino_pixel	KEYWORD1
+mode	KEYWORD1
+led_strip	KEYWORD1
+HttpMethod	KEYWORD1
+Uri	KEYWORD1
+RequestData	KEYWORD1
+ResponseData	KEYWORD1
+Mode	KEYWORD1
+Color	KEYWORD1
+ModeBase	KEYWORD1
+SingleColor	KEYWORD1
+Scanner	KEYWORD1
+Rainbow	KEYWORD1
+RainbowCycle	KEYWORD1
+LedStripBase	KEYWORD1
+LedStripNeoPixel	KEYWORD1
+ArduinoPixelServer	KEYWORD1
+ArduinoPixel	KEYWORD1
+
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+init	KEYWORD2
+update	KEYWORD2
+getPixel	KEYWORD2
+getColor	KEYWORD2
+setColor	KEYWORD2
+getModeType	KEYWORD2
+getMode	KEYWORD2
+setMode	KEYWORD2
+getNumLeds	KEYWORD2
+processRequest	KEYWORD2
+colorize	KEYWORD2
+check	KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+strip_neopixel_	KEYWORD2
+port	KEYWORD2
+num_leds	KEYWORD2
+strip_pin	KEYWORD2
+pixel	KEYWORD2
+server_	KEYWORD2
+client	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################

@@ -1,33 +1,38 @@
 ArduinoPixel
 ============
 
-This project consists of two pieces. The first piece is an **Arduino sketch** that implements a **Web Server** and offers an **API** for controlling a [NeoPixel LED Strip](http://www.adafruit.com/products/1138). The second piece is an **Android app**, `ArduinoPixel`, that connects to the **Arduino Web Server** and sends **commands** to control the **color** and the **on/off state** of the **LED strip**.
+ArduinoPixel is a distributed system for operating a LED strip. On one side, there is an **Arduino sketch** that implements a **web server** and offers an **API** for controlling a [NeoPixel LED strip](http://www.adafruit.com/products/1138). On the other side, there is the `ArduinoPixel` **Android app** that connects to the Arduino web server and sends **requests** to control the LED strip.
 
+![promo](http://i76.photobucket.com/albums/j16/paign10/promo_zpsfnckempv.png)
 <br>
-![promo](http://i859.photobucket.com/albums/ab154/lampnick67/promo__zpsbbabfe87.png)
-<br><br>
 
-The **Arduino sketch** is also available at [codebender](https://codebender.cc/sketch:31742). You can **clone** the project, **update** the controller and network parameters, and **upload** it straight to your **Arduino Ethernet**, or any other Arduino compatible board w/ an Ethernet Shield.
+The **Arduino sketch** is almost ready for use, but you'll need to **tweak** a few parameters first. Once you update the network and strip parameters, you are free to **upload** the code straight to your board. Any Arduino compatible board with an Ethernet or Wifi connection should work fine.
 
-The **Android application** is available on [Google Play](https://play.google.com/store/apps/details?id=ln.paign10.arduinopixel). **Install** the app on your phone or tablet, **configure** the network parameters you set earlier in the Arduino sketch, and you are **ready** to go. You can watch a demo on [YouTube](http://www.youtube.com/watch?v=AuqOQ0Pe_c0).
+The **Android app** is available on the [Google Play Store](https://play.google.com/store/apps/details?id=ln.paign10.arduinopixel). **Install** the app on your phone or tablet, **configure** the network parameters you set in the Arduino sketch and you are **ready** to go. You can watch a demo of the app [here](http://www.youtube.com/watch?v=AuqOQ0Pe_c0).
 
 API
 ---
 
-The server accepts the following HTTP requests:
-* A `GET` request to `/`. It responds with a **Hello from Arduino Server** message.
-* A `GET` request to `/strip/status/`. It responds with **ON** or **OFF** for the on/off state of the strip.
-* A `GET` request to `/strip/color/`. It responds with a **JSON representation** of the strip's **color**, e.g. `{"r":92,"g":34,"b":127}`.
-* A `PUT` request to `/strip/status/on/`. It **turns** the strip **on**.
-* A `PUT` request to `/strip/status/off/`. It **turns** the strip **off**.
-* A `PUT` request to `/strip/color/`. It **changes** the strip's **color**. The **data** are delivered as a **JSON object**, e.g. `{"r":48,"g":254,"b":176}`.
+The web server offers an API to;
+* Get info about the strip
+* Turn the strip on and off
+* Change the color of the strip
+* Change what is being displayed on the strip
 
+For more information, see [here](arduino_code/README.md).
 
-Testing
+Support
 -------
 
-The **Android app** was tested on a tablet with Android v`4.1.1`.
+The Arduino code has been tested on Arduino Uno, Leonardo, and Mega with a WIZnet W5100 Ethernet module. The Android app has been tested on a tablet with Android `v4.1.1`.
 
+I have made the decision to focus more on functionality and less on support for small boards. Keep in mind that as development progresses and new features are being added, the code will keep growing and thus need more space in memory to operate. If you upload the code to your board and the strip is not working, try lowering the number of LEDs until you observe the desired behaviour.
+
+In my own experiments, the code functioned properly with 112 LEDs on Arduino Leonardo and Mega, but on Arduino Uno it maxed out at 80+ LEDs.
+
+Although the project started with NeoPixel LEDs in mind, it has evolved to be able to support any LED strip. You only need to define a class for the strip and conform to the required API. If interested, see [led_strip_base.h](arduino_code/ArduinoPixel/src/led_strip/led_strip_base.h).
+
+The project also supports changing what is being displayed on the strip with modes. Currently, the following modes are available: SINGLE_COLOR, SCANNER, RAINBOW, RAINBOW_CYCLE. Once again, you are able to add your own modes, as long as you conform to the required API. If interested, see [mode_base.h](arduino_code/ArduinoPixel/src/mode/mode_base.h). The Android app doesn't yet support controlling the modes.
 
 Attribution
 -----------
