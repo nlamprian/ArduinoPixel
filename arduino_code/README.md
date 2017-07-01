@@ -1,6 +1,18 @@
 ![boards](http://i76.photobucket.com/albums/j16/paign10/boards_zpso9xdzn36.jpg)
 
+Support
+=======
+
 The code has been tested on Arduino Uno, Leonardo, and Mega with a WIZnet W5100 Ethernet module. Arduino Leonardo and Mega can handle at least 112 LEDs. Arduino Uno maxs out at 80+ LEDs.
+
+ESP32
+-----
+
+There is experimental support for ESP32. There are some known issues with the board. From time to time, HTTP requests either never arrive or arrive with missing data. When this happens, you need to give it some time, and the board will eventually "wake up" after a few seconds.
+
+You need a level shifter to connect the STRIP pin (3.3V) on ESP32 to the DATA pin (5V) of the strip. Personally, I put together a single channel version of [this](https://www.sparkfun.com/products/12009) breakout board.
+
+The driver for the strip included in the repo is a refactored version of [this](https://github.com/MartyMacGyver/ESP32-digital-RGB-LED-drivers) library.
 
 API
 ===

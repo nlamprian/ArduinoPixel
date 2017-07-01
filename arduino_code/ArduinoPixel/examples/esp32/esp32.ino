@@ -1,6 +1,6 @@
-/*! \file arduino_wifi.ino
+/*! \file esp32.ino
  *  \brief A distributed system that implements a web server for controlling
- *  a NeoPixel LED strip.
+ *  a WS2812 LED strip on ESP32.
  *  \details This is the server side code of system. The client side is an
  *  Android app that allows to control the LED strip. For the server side,
  *  the required equipment is an Arduino compatible board with Wifi
@@ -71,89 +71,85 @@
  *  IN THE SOFTWARE.
  */
 
-#include <SPI.h>
 #include <WiFi.h>
 
 #include "arduino_pixel_server.h"
-#include "led_strip/led_strip_neopixel.h"
+#include "led_strip/led_strip_esp_ws2812.h"
 
 using namespace arduino_pixel;
 
 // ============================================================================
 // == Please specify the following parameters =================================
 // ================================================================== start ===
-char ssid[] = "<ssid>";
-char pass[] = "<password>";
+const char ssid[] = "<ssid>";
+const char pass[] = "<password>";
 static IPAddress ip(192, 168, 1, 10);
+static IPAddress gateway(192, 168, 1, 1);
+static IPAddress subnet(255, 255, 255, 0);
 const int port = 80;
 const int num_leds = 112;
-const int strip_pin = 7;
+const int strip_pin = 15;
 // ================================================================== end =====
 // ============================================================================
+const int onboard_led = 2;
 
 class ArduinoPixel : public ArduinoPixelServer {
  public:
   ArduinoPixel()
-      : strip_neopixel_(num_leds, strip_pin, NEO_GRB + NEO_KHZ800),
-        server_(port) {}
+      : strip_ws2812_(num_leds, strip_pin, Ws2812::LedType::WS2812B),
+        server_(port, 1) {}
 
   virtual ~ArduinoPixel() {}
 
   using ArduinoPixelServer::init;
 
   void init() {
-    strip_neopixel_.init();
-    init(&strip_neopixel_);
+    strip_ws2812_.init();
+    init(&strip_ws2812_);
     wifiConnect();
     server_.begin();
+    Serial.println("Server started\n");
   }
 
   void check() {
     WiFiClient client = server_.available();
     if (client) processRequest(client);
-    strip_neopixel_.colorize();
+    strip_ws2812_.colorize();
   }
 
  private:
   void wifiConnect() {
-    WiFi.config(ip);
+    pinMode(onboard_led, OUTPUT);
+    digitalWrite(onboard_led, HIGH);
+    WiFi.config(ip, gateway, subnet);
+    Serial.print("\nAttempting to connect to SSID: ");
+    Serial.println(ssid);
     WiFi.begin(ssid, pass);
-#ifdef DEBUG
-      Serial.print("Attempting to connect to SSID: ");
-      Serial.println(ssid);
-#endif
     while (WiFi.status() != WL_CONNECTED) delay(1000);
-#ifdef DEBUG
     printWifiStatus();
-#endif
+    digitalWrite(onboard_led, LOW);
   }
 
-#ifdef DEBUG
   void printWifiStatus() {
     Serial.println("WiFi connection established: ");
-    Serial.print(" * SSID: ");
+    Serial.print("* SSID: ");
     Serial.println(WiFi.SSID());
-    Serial.print(" * IP Address: ");
+    Serial.print("* IP Address: ");
     Serial.println(WiFi.localIP());
-    Serial.print(" * Signal Strength (RSSI): ");
+    Serial.print("* Signal Strength (RSSI): ");
     Serial.print(WiFi.RSSI());
     Serial.println(" dBm");
   }
-#endif
 
-  led_strip::LedStripNeoPixel strip_neopixel_;
+  led_strip::LedStripEspWs2812 strip_ws2812_;
   WiFiServer server_;
 };
 
 ArduinoPixel pixel;
 
 void setup() {
-#ifdef DEBUG
-  Serial.begin(9600);
-  while (!Serial)
-    ;
-#endif
-
+  Serial.begin(115200);
+  delay(100);
   pixel.init();
 }
 

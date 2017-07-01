@@ -202,6 +202,7 @@ void ArduinoPixelServer::sendResponse(Client &client,
   Serial.print(response.status_code);
   Serial.print(" ");
   Serial.println(response.status_msg);
+  Serial.println("Content-type:text/plain");
   if (!response.keep_alive) Serial.println("Connection: close");
   Serial.println();
   if (response.data.length()) {
@@ -216,11 +217,13 @@ void ArduinoPixelServer::sendResponse(Client &client,
   client.print(response.status_code);
   client.print(" ");
   client.println(response.status_msg);
+  client.println("Content-type:text/plain");
   if (!response.keep_alive) client.println("Connection: close");
   if (response.data.length()) {
     client.println();
     client.print(response.data);
   }
+  client.println();
   delay(1);
   client.stop();
 }

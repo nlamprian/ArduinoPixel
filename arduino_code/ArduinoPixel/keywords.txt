@@ -22,6 +22,7 @@ Rainbow	KEYWORD1
 RainbowCycle	KEYWORD1
 LedStripBase	KEYWORD1
 LedStripNeoPixel	KEYWORD1
+LedStripEspWs2812	KEYWORD1
 ArduinoPixelServer	KEYWORD1
 ArduinoPixel	KEYWORD1
 
@@ -41,12 +42,15 @@ getNumLeds	KEYWORD2
 processRequest	KEYWORD2
 colorize	KEYWORD2
 check	KEYWORD2
+wifiConnect	KEYWORD2
+printWifiStatus	KEYWORD2
 
 #######################################
 # Instances (KEYWORD2)
 #######################################
 
 strip_neopixel_	KEYWORD2
+strip_ws2812_	KEYWORD2
 port	KEYWORD2
 num_leds	KEYWORD2
 strip_pin	KEYWORD2

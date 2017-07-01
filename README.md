@@ -13,7 +13,7 @@ The **Android app** is available on the [Google Play Store](https://play.google.
 API
 ---
 
-The web server offers an API to;
+The web server offers an API to:
 * Get info about the strip
 * Turn the strip on and off
 * Change the color of the strip
@@ -24,7 +24,7 @@ For more information, see [here](arduino_code/README.md).
 Support
 -------
 
-The Arduino code has been tested on Arduino Uno, Leonardo, and Mega with a WIZnet W5100 Ethernet module. The Android app has been tested on a tablet with Android `v4.1.1`.
+The Arduino code has been tested on Arduino Uno, Leonardo, and Mega with a WIZnet W5100 Ethernet module. The Android app has been tested on a tablet with Android v4.1.1. There is also experimental support for ESP32.
 
 I have made the decision to focus more on functionality and less on support for small boards. Keep in mind that as development progresses and new features are being added, the code will keep growing and thus need more space in memory to operate. If you upload the code to your board and the strip is not working, try lowering the number of LEDs until you observe the desired behaviour.
 

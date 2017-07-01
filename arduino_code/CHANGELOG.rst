@@ -2,6 +2,10 @@
  Changelog for ArduinoPixel
 ============================
 
+2.1.0 (2017-07-01)
+------------------
+* Added experimental support for ESP32.
+
 2.0.0 (2017-06-27)
 ------------------
 * Refactored the code to make it maintainable and extensible.
