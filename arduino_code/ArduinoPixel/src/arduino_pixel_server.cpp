@@ -301,6 +301,7 @@ void ArduinoPixelServer::updateMode(const String &data) {
 }
 
 void ArduinoPixelServer::updateColor(const String &json) {
+  if (json.length() == 0) return;
   byte idx = 0;
   byte color[3];
   for (byte i = 0; i < 3; ++i) {

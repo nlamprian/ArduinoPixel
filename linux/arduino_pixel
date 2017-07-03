@@ -1,0 +1,92 @@
+#!/bin/bash
+
+NAME=$(basename $0)
+BRIEF="$NAME is a client that communicates with an ArduinoPixel web server."
+MORE="For more information about the communication with the ArduinoPixel sever, visit https://github.com/nlamprian/ArduinoPixel/tree/master/arduino_code"
+
+method=
+resource=
+data=
+
+usage_cmds() {
+    echo -e "$BRIEF"
+    echo -e "\nCommands:"
+    echo -e "\tarduino_pixel get\tgets information from the server"
+    echo -e "\tarduino_pixel put\tsends information to the server"
+    echo -e "\nType arduino_pixel <command> --help for more detailed usage, e.g. 'arduino_pixel get --help'"
+}
+
+usage_get() {
+    echo -e "$BRIEF\n"
+    echo -e "Usage: $NAME get [-u <uri>] <resource>\n"
+    echo -e "Description:"
+    echo -e "\t$MORE\n"
+    echo -e "\t-u, --uri"
+    echo -e "\t\tserver uri, e.g. 192.168.1.10:80. If not set, the value is read from the ARDUINO_PIXEL_URI environment variable"
+    echo -e "\t<resource>"
+    echo -e "\t\tthe requested resource, e.g. /strip/color"
+    echo -e "\nExample:"
+    echo -e "\tGet the color of the strip: arduino_pixel get /strip/color"
+}
+
+usage_put() {
+    echo -e "$BRIEF\n"
+    echo -e "Usage: $NAME put [-u <uri>] <resource> [<data>]\n"
+    echo -e "Description:"
+    echo -e "\t$MORE\n"
+    echo -e "\t-u, --uri"
+    echo -e "\t\tserver uri, e.g. 192.168.1.10:80. If not set, it's read from the ARDUINO_PIXEL_URI environment variable"
+    echo -e "\t<resource>"
+    echo -e "\t\tthe requested resource, e.g. /strip/color"
+    echo -e "\t<data>"
+    echo -e "\t\tany required data, e.g. '{\"r\":36,\"g\":113,\"b\":255}'"
+    echo -e "\nExample:"
+    echo -e "\tGet the color of the strip: arduino_pixel put /strip/color '{\"r\":36,\"g\":113,\"b\":255}'"
+}
+
+usage() {
+    if [ $method = "GET" ]; then usage_get; else usage_put; fi
+}
+
+# Get HTTP method
+case $1 in
+    "get" | "put" ) method=$(echo $1 | awk '{print toupper($0)}')
+                    shift
+                    ;;
+    * )             usage_cmds
+                    exit
+esac
+
+# Get URI
+case $1 in
+    -h | --host )  shift
+                   ARDUINO_PIXEL_URI=$1
+                   ;;
+    "--help" )     usage
+                   exit
+                   ;;
+esac
+
+# Check argument requirements
+if [ -z $ARDUINO_PIXEL_URI ]; then
+    echo -e "Error: Please specify the server uri\n====================================" 1>&2
+    usage
+    exit 1
+elif [ $method = "GET" ] && [ $# != 1 ]; then
+    echo -e "Error: Not enough arguments\n===========================" 1>&2
+    usage;
+    exit 1
+elif [ $method = "PUT" ] && [ $# -lt 1 ]; then
+    echo -e "Error: Not enough arguments\n===========================" 1>&2
+    usage;
+    exit 1
+fi
+
+# Get resource
+resource=$1
+
+# Get data
+data=$2
+
+# Send HTTP request
+curl -X $method -d arg="$data" $ARDUINO_PIXEL_URI$resource
