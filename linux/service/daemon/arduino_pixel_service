@@ -1,0 +1,22 @@
+#!/bin/bash
+# http://www.debian-administration.org/articles/212
+
+[ -f /etc/default/arduino_pixel_service ] && . /etc/default/arduino_pixel_service
+
+if [ -z "$ARDUINO_PIXEL_URI" ];  then
+  echo "ARDUINO_PIXEL_URI is not set, please set it in /etc/default/arduino_pixel_service" 1>&2
+  exit 1
+fi
+
+case "$1" in
+    start )
+        arduino_pixel_service &
+        ;;
+    stop )
+        arduino_pixel put /strip/status/off
+        ;;
+    * )
+        echo "Usage: /etc/init.d/arduino_pixel_service {start|stop}" 1>&2
+        exit 1
+        ;;
+esac

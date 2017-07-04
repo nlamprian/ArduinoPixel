@@ -1,0 +1,52 @@
+#!/usr/bin/python
+
+import os
+import datetime
+import pause
+import requests
+
+# ==============================================================================
+# === Define a schedule ========================================================
+# ==================================================================== start ===
+start_time = datetime.time(21, 0)  # 9:00 PM
+stop_time  = datetime.time( 6, 0)  # 6:00 AM
+# ==================================================================== end =====
+# ==============================================================================
+
+URI = os.environ['ARDUINO_PIXEL_URI']
+
+URI_OFF = 'http://' + URI + '/strip/status/off'
+URI_ON = 'http://' + URI + '/strip/status/on'
+
+def off():
+    for i in range(2):
+        res = requests.put(URI_OFF)
+        if res.status_code == 200: break
+        time.sleep(1)
+
+def on():
+    for i in range(2):
+        res = requests.put(URI_ON)
+        if res.status_code == 200: break
+        time.sleep(1)
+
+def getDatetimes():
+    now = datetime.datetime.now()
+    start = now.replace(hour = start_time.hour, minute = start_time.minute, second = 0, microsecond = 0)
+    stop = now.replace(hour = stop_time.hour, minute = stop_time.minute, second = 0, microsecond = 0)
+    if stop < start: stop = stop.replace(day = stop.day + 1)
+    return (now, start, stop)
+
+while True:
+    now, start, stop = getDatetimes()
+
+    if now < start:
+        off()
+        pause.until(start)
+    elif now < stop:
+        on()
+        pause.until(stop)
+    else:
+        off()
+        next_start = start.replace(day = start.day + 1)
+        pause.until(next_start)

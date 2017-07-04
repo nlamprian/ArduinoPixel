@@ -50,21 +50,25 @@ usage() {
 
 # Get HTTP method
 case $1 in
-    "get" | "put" ) method=$(echo $1 | awk '{print toupper($0)}')
-                    shift
-                    ;;
-    * )             usage_cmds
-                    exit
+    "get" | "put" )
+        method=$(echo $1 | awk '{print toupper($0)}')
+        shift
+        ;;
+    * )
+        usage_cmds
+        exit
 esac
 
 # Get URI
 case $1 in
-    -h | --host )  shift
-                   ARDUINO_PIXEL_URI=$1
-                   ;;
-    "--help" )     usage
-                   exit
-                   ;;
+    -h | --host )
+        shift
+        ARDUINO_PIXEL_URI=$1
+        ;;
+    "--help" )
+        usage
+        exit
+        ;;
 esac
 
 # Check argument requirements
