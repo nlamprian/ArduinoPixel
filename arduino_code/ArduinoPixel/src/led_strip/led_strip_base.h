@@ -53,8 +53,9 @@ class LedStripBase {
   /**
    * \brief Updates the LED strip.
    * \details Gets the colors from the mode and updates the LED strip.
+   * \param[in] force Force updating the strip.
    */
-  virtual void colorize() = 0;
+  virtual void colorize(bool force = false) = 0;
   /**
    * \brief Gets the number of LEDs on the strip.
    * \return The number of LEDs.

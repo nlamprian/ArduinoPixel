@@ -47,8 +47,9 @@ class ModeBase {
    * \brief Updates the colors on the LED array.
    * \note If you think the mode as a video (sequence of images), 
    * this is where you fill the LED array with the next image.
+   * \return Flag to indicate whether the LED array has been updated.
    */
-  virtual void update() = 0;
+  virtual bool update() = 0;
   /**
    * \brief Gets the color of the request LED (aka pixel).
    * \param[in] idx the index of the pixel in the array.

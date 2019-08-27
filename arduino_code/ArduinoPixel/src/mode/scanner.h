@@ -59,16 +59,17 @@ class Scanner : public ModeBase {
     last_update_time_ = millis();
   }
 
-  virtual void update() override {
-    unsigned long new_update_time = millis();
-    if ((unsigned long)(new_update_time - last_update_time_) < period_) return;
+  virtual bool update() override {
+    unsigned long current_time = millis();
+    if ((unsigned long)(current_time - last_update_time_) < period_) return false;
 
     turnPixelOff(start_idx_);
     start_idx_ = (start_idx_ + 1) % num_leds_;
     end_idx_ = (end_idx_ + 1) % num_leds_;
     turnPixelOn(end_idx_);
 
-    last_update_time_ = new_update_time;
+    last_update_time_ = current_time;
+    return true;
   }
 
   virtual const Color& getPixel(int idx) const override { return pixels_[idx]; }

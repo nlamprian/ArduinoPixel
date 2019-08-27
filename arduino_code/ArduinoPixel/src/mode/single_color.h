@@ -45,7 +45,7 @@ class SingleColor : public ModeBase {
 
   virtual void init() override {}
 
-  virtual void update() override {}
+  virtual bool update() override { return false; }
 
   virtual const Color& getPixel(int idx = 0) const override { return color_; }
 

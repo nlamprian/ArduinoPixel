@@ -65,13 +65,13 @@ void ArduinoPixelServer::init(led_strip::LedStripBase *strip) {
 void ArduinoPixelServer::powerOn() {
   power_ = true;
   strip_->setMode(mode_);
-  strip_->colorize();
+  strip_->colorize(true);
 }
 
 void ArduinoPixelServer::powerOff() {
   power_ = false;
   strip_->setMode(mode_off_);
-  strip_->colorize();
+  strip_->colorize(true);
 }
 
 RequestData ArduinoPixelServer::parseRequest(Client &client) const {
@@ -264,11 +264,11 @@ void ArduinoPixelServer::updateStrip(const RequestData &request) {
       break;
     case Uri::MODE_PUT:  // Update mode
       updateMode(request.data);
-      strip_->colorize();
+      strip_->colorize(true);
       break;
     case Uri::COLOR_PUT:  // Update the LED strip color
       updateColor(request.data);
-      strip_->colorize();
+      strip_->colorize(true);
       break;
   }
 }

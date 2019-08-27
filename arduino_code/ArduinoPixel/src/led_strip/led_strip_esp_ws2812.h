@@ -43,8 +43,8 @@ class LedStripEspWs2812 : public LedStripBase {
 
   virtual void init() override { strip_.init(); }
 
-  virtual void colorize() override {
-    mode_->update();
+  virtual void colorize(bool force = false) override {
+    if (not mode_->update() and not force) return;
     for (uint16_t idx = 0; idx < strip_.numPixels(); ++idx) {
       const Color &color = mode_->getPixel(idx);
       strip_.setPixelColor(idx, color.red, color.green, color.blue);

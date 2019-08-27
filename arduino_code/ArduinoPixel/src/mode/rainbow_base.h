@@ -50,11 +50,12 @@ class RainbowBase : public ModeBase {
 
   virtual void init() override { setPixels(); }
 
-  virtual void update() override {
-    unsigned long new_update_time = millis();
-    if ((unsigned long)(new_update_time - last_update_time_) < period_) return;
+  virtual bool update() override {
+    unsigned long current_time = millis();
+    if ((unsigned long)(current_time - last_update_time_) < period_) return false;
     setPixels();
-    last_update_time_ = new_update_time;
+    last_update_time_ = current_time;
+    return true;
   }
 
   virtual const Color& getPixel(int idx) const override { return pixels_[idx]; }

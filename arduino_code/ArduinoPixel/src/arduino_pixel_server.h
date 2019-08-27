@@ -29,9 +29,9 @@
 #ifndef ARDUINO_PIXEL_ARDUINO_PIXEL_SERVER_H
 #define ARDUINO_PIXEL_ARDUINO_PIXEL_SERVER_H
 
-// #define DEBUG
-
 #include <Client.h>
+
+// #define DEBUG
 
 #include "common_types.h"
 #include "server_types.h"
