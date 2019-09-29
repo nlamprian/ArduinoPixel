@@ -10,6 +10,13 @@ The **Arduino sketch** is almost ready for use, but you'll need to **tweak** a f
 
 The **Android app** is available on the [Google Play Store](https://play.google.com/store/apps/details?id=ln.paign10.arduinopixel). **Install** the app on your phone or tablet, **configure** the network parameters you set in the Arduino sketch and you are **ready** to go. You can watch a demo of the app [here](http://www.youtube.com/watch?v=AuqOQ0Pe_c0).
 
+Call for Action
+---
+
+To anyone with an ESP32 board and a NeoPixel strip, it would be highly appreciated if you could test a new implementation of the `esp32` sketch and provide some [feedback](https://github.com/nlamprian/ArduinoPixel/issues).
+
+You can find the updated example on the [esp32 branch](https://github.com/nlamprian/ArduinoPixel/tree/esp32).
+
 API
 ---
 
