@@ -12,8 +12,6 @@ There is experimental support for ESP32. There are some known issues with the bo
 
 You need a level shifter to connect the STRIP pin (3.3V) on ESP32 to the DATA pin (5V) of the strip. Personally, I put together a single channel version of [this](https://www.sparkfun.com/products/12009) breakout board.
 
-The driver for the strip included in the repo is a refactored version of [this](https://github.com/MartyMacGyver/ESP32-digital-RGB-LED-drivers) library.
-
 API
 ===
 

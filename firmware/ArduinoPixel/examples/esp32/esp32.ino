@@ -74,7 +74,7 @@
 #include <WiFi.h>
 
 #include "arduino_pixel_server.h"
-#include "led_strip/led_strip_esp_ws2812.h"
+#include "led_strip/led_strip_neopixel_esp32.h"
 
 using namespace arduino_pixel;
 
@@ -87,7 +87,7 @@ static IPAddress ip(192, 168, 1, 10);
 static IPAddress gateway(192, 168, 1, 1);
 static IPAddress subnet(255, 255, 255, 0);
 const int port = 80;
-const int num_leds = 112;
+const int num_leds = 60;
 const int strip_pin = 15;
 // ================================================================== end =====
 // ============================================================================
@@ -96,16 +96,15 @@ const int onboard_led = 2;
 class ArduinoPixel : public ArduinoPixelServer {
  public:
   ArduinoPixel()
-      : strip_ws2812_(num_leds, strip_pin, Ws2812::LedType::WS2812B),
-        server_(port, 1) {}
+      : strip_neopixel_(num_leds, strip_pin), server_(port, 1) {}
 
   virtual ~ArduinoPixel() {}
 
   using ArduinoPixelServer::init;
 
   void init() {
-    strip_ws2812_.init();
-    init(&strip_ws2812_);
+    strip_neopixel_.init();
+    init(&strip_neopixel_);
     wifiConnect();
     server_.begin();
     Serial.println("Server started\n");
@@ -114,7 +113,7 @@ class ArduinoPixel : public ArduinoPixelServer {
   void check() {
     WiFiClient client = server_.available();
     if (client) processRequest(client);
-    strip_ws2812_.colorize();
+    strip_neopixel_.colorize();
   }
 
  private:
@@ -141,7 +140,7 @@ class ArduinoPixel : public ArduinoPixelServer {
     Serial.println(" dBm");
   }
 
-  led_strip::LedStripEspWs2812 strip_ws2812_;
+  led_strip::LedStripNeoPixelEsp32 strip_neopixel_;
   WiFiServer server_;
 };
 
