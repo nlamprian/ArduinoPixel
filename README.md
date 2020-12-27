@@ -3,15 +3,14 @@ ArduinoPixel
 
 ArduinoPixel is a distributed system for operating a LED strip. On one side, there is an **Arduino sketch** that implements a **web server** and offers an **API** for controlling a [NeoPixel LED strip](http://www.adafruit.com/products/1138). On the other side, there is the `ArduinoPixel` **Android app** that connects to the Arduino web server and sends **requests** to control the LED strip.
 
-![promo](http://i76.photobucket.com/albums/j16/paign10/promo_zpsfnckempv.png)
-<br>
+![promo](https://github.com/nlamprian/ArduinoPixel/wiki/assets/project.png)
 
 The **Arduino sketch** is almost ready for use, but you'll need to **tweak** a few parameters first. Once you update the network and strip parameters, you are free to **upload** the code straight to your board. Any Arduino compatible board with an Ethernet or Wifi connection should work fine.
 
 The **Android app** is available on the [Google Play Store](https://play.google.com/store/apps/details?id=ln.paign10.arduinopixel). **Install** the app on your phone or tablet, **configure** the network parameters you set in the Arduino sketch and you are **ready** to go. You can watch a demo of the app [here](http://www.youtube.com/watch?v=AuqOQ0Pe_c0).
 
 Call for Action
----
+---------------
 
 To anyone with an ESP32 board and a NeoPixel strip, it would be highly appreciated if you could test a new implementation of the `esp32` sketch and provide some [feedback](https://github.com/nlamprian/ArduinoPixel/issues).
 

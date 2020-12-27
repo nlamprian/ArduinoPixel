@@ -27,7 +27,7 @@
  *     > is available on Google Play, w/ the name ArduinoPixel
  * 
  * Author:
- *   Nick Lamprianidis { paign10.ln [at] gmail [dot] com }
+ *   Nick Lamprianidis { nlamprian [at] gmail [dot] com }
  * 
  * License:
  *   Copyright (c) 2014 Nick Lamprianidis 

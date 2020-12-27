@@ -1,4 +1,4 @@
-![boards](http://i76.photobucket.com/albums/j16/paign10/boards_zpso9xdzn36.jpg)
+![boards](https://github.com/nlamprian/ArduinoPixel/wiki/assets/boards.jpg)
 
 Support
 =======
